@@ -4,7 +4,7 @@ module Main exposing (main)
 import Html.App
 import Html exposing (Html)
 import Html.Attributes exposing (style, class)
-import Color exposing (Color)
+import BallColor exposing (Color)
 import Time exposing (Time)
 import Keyboard
 import Key
@@ -12,6 +12,8 @@ import String
 import Random
 import Array exposing (Array)
 import Animation
+import Audio
+import Dict exposing (Dict)
 
 
 main : Program Never
@@ -54,7 +56,7 @@ start : ( Model, Cmd Msg )
 start =
     ( Playing
         { remaining = totalTime
-        , color = defaultColor
+        , color = BallColor.default
         , score = 0
         , style =
             Animation.style
@@ -75,26 +77,6 @@ totalTime =
     3 * Time.minute
 
 
-defaultColor : Color
-defaultColor =
-    Color.white
-
-
-colors : Array Color
-colors =
-    Array.fromList
-        [ Color.blue
-        , Color.red
-        , Color.green
-        , Color.lightPurple
-        , Color.black
-        , Color.yellow
-        , Color.darkPurple
-        , Color.orange
-        ]
-
-
-
 -- UPDATE
 
 type Msg
@@ -111,10 +93,10 @@ update message model =
             keyUp keyCode model
 
         Tick time ->
-            ( tick time model, Cmd.none )
+            tick time model
 
         NewColor color ->
-            ( changeColor color model, Cmd.none )
+            changeColor color model
 
         Animate animation ->
             ( updateAnimation animation model, Cmd.none )
@@ -156,24 +138,17 @@ keyUp keyCode model =
             ( model, Cmd.none )
 
 
-colorGenerator : Random.Generator Color
-colorGenerator =
-    Random.map
-        (\i -> Maybe.withDefault defaultColor (Array.get i colors))
-        (Random.int 0 ((Array.length colors) - 1))
-
-
 generateColor : Cmd Msg
 generateColor =
-    Random.generate NewColor colorGenerator
+    Random.generate NewColor BallColor.generator
 
 
 
-changeColor : Color -> Model -> Model
+changeColor : Color -> Model -> ( Model, Cmd Msg )
 changeColor color model =
     case model of
         Playing submodel ->
-            Playing
+            ( Playing
                 { submodel
                 | color = color
                 , style =
@@ -187,29 +162,33 @@ changeColor color model =
                         ]
                         submodel.style
                 }
+            , Audio.play (BallColor.name color)
+            )
 
         _ ->
-            model
+            ( model, Cmd.none )
 
 
-tick : Time -> Model -> Model
+tick : Time -> Model -> ( Model, Cmd Msg )
 tick time model =
     case model of
         Playing submodel ->
             if submodel.remaining > 0 then
-                Playing
+                ( Playing
                     { submodel
                     | remaining = submodel.remaining - timeInterval
                     }
+                , Cmd.none
+                )
 
             else
-                Ended submodel.score
+                ( Ended submodel.score, Audio.play "gameOver" )
 
         Waiting ->
-            model
+            ( model, Cmd.none )
 
         Ended _ ->
-            model
+            ( model, Cmd.none )
 
 
 
@@ -281,7 +260,7 @@ viewColor color currentStyle =
         (Animation.render currentStyle
             ++ [ class "current-color"
                , style
-                    [ ("background-color", cssColor color)
+                    [ ("background-color", BallColor.cssColor color)
                     ]
                ]
         )
@@ -293,16 +272,6 @@ viewScore score =
     Html.div
         [ class "score" ]
         [ Html.text ("Score: " ++ toString score) ]
-
-
-
-cssColor : Color -> String
-cssColor color =
-    let
-        rgb = Color.toRgb color
-        components = [rgb.red, rgb.green, rgb.blue]
-    in
-        "rgb(" ++ (String.join "," (List.map toString components)) ++ ")"
 
 
 viewFinalScore : Score -> Html msg

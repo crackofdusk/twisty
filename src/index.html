@@ -73,6 +73,22 @@ html, body {
   </body>
   <script src="app.js"></script>
   <script>
-    var app = Elm.Main.fullscreen();
+var app = Elm.Main.fullscreen();
+
+var sounds = {
+  blue: new Audio('assets/blue.m4a'),
+  red: new Audio('assets/red.m4a'),
+  green: new Audio('assets/green.m4a'),
+  pink: new Audio('assets/pink.m4a'),
+  black: new Audio('assets/black.m4a'),
+  yellow: new Audio('assets/yellow.m4a'),
+  purple: new Audio('assets/purple.m4a'),
+  orange: new Audio('assets/orange.m4a'),
+  gameOver: new Audio('assets/gameover3.m4a'),
+};
+
+app.ports.play.subscribe(function(sound) {
+  sounds[sound].play();
+});
   </script>
 </html>
