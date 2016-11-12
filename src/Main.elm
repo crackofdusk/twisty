@@ -3,7 +3,7 @@ module Main exposing (main)
 
 import Html.App
 import Html exposing (Html)
-import Html.Attributes exposing (style)
+import Html.Attributes exposing (style, class)
 import Color exposing (Color)
 import Time exposing (Time)
 import Keyboard
@@ -127,7 +127,7 @@ keyUp keyCode model =
                     )
 
                 Ended _ ->
-                    start
+                    ( Waiting, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
@@ -183,12 +183,7 @@ tick time model =
 view : Model -> Html Msg
 view model =
     Html.div
-        [ style
-            [ ("width", "100%")
-            , ("height", "100%")
-            , ("font-family", "sans-serif")
-            ]
-        ]
+        [ class "container" ]
         [ viewCurrentScreen model ]
 
 
@@ -208,18 +203,14 @@ viewCurrentScreen model =
 viewStartScreen : Html msg
 viewStartScreen =
     Html.div
-        [ style
-            [ ("text-align", "center")
-            , ("font-size", "200%")
-            ]
-        ]
+        [ class "welcome-screen" ]
         [ Html.text "Press the button to start" ]
 
 
 viewProgressScreen : PlayModel -> Html msg
 viewProgressScreen model =
     Html.div
-        []
+        [ class "progress-screen" ]
         [ viewTime model.remaining
         , viewColor model.color
         , viewScore model.score
@@ -229,10 +220,7 @@ viewProgressScreen model =
 viewTime : Time -> Html msg
 viewTime time =
     Html.div
-        [ style
-            [ ("font-size", "400%")
-            , ("text-align", "center")
-            ]
+        [ class "timer"
         ]
         [ minutesAndSeconds time
             |> Html.text
@@ -254,11 +242,9 @@ minutesAndSeconds time =
 viewColor : Color -> Html msg
 viewColor color =
     Html.div
-        [ style
+        [ class "current-color"
+        ,  style
             [ ("background-color", cssColor color)
-            , ("width", "50%")
-            , ("height", "200px")
-            , ("margin", "0 auto")
             ]
         ]
         []
@@ -267,10 +253,7 @@ viewColor color =
 viewScore : Score -> Html msg
 viewScore score =
     Html.div
-        [ style
-            [ ("text-align", "center")
-            ]
-        ]
+        [ class "score" ]
         [ Html.text ("Score: " ++ toString score) ]
 
 
@@ -287,23 +270,15 @@ cssColor color =
 viewFinalScore : Score -> Html msg
 viewFinalScore score =
     Html.div
-        [ style
-            [ ("text-align", "center")
-            ]
-        ]
+        [ class "score-screen" ]
         [ Html.div
-            [ style
-                [ ("font-size", "400%" ) ]
-            ]
+            []
             [ Html.text "Final score" ]
         , Html.div
-            [ style
-                [ ("font-size", "800%")
-                ]
-            ]
+            [ class "final-score" ]
             [ Html.text (toString score) ]
         , Html.div
-            [ ]
+            [ class "restart-hint" ]
             [ Html.text "Press the button to play again" ]
         ]
 
