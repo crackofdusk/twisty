@@ -11,6 +11,7 @@ import Key
 import String
 import Random
 import Array exposing (Array)
+import Animation
 
 
 main : Program Never
@@ -39,6 +40,7 @@ type alias PlayModel =
     { remaining : Time
     , color : Color
     , score : Score
+    , style : Animation.State
     }
 
 
@@ -54,6 +56,10 @@ start =
         { remaining = totalTime
         , color = defaultColor
         , score = 0
+        , style =
+            Animation.style
+                [ Animation.opacity 0
+                ]
         }
     , generateColor
     )
@@ -95,6 +101,7 @@ type Msg
     = Tick Time
     | KeyUp Keyboard.KeyCode
     | NewColor Color
+    | Animate Animation.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -109,6 +116,22 @@ update message model =
         NewColor color ->
             ( changeColor color model, Cmd.none )
 
+        Animate animation ->
+            ( updateAnimation animation model, Cmd.none )
+
+
+
+updateAnimation : Animation.Msg -> Model -> Model
+updateAnimation animation model =
+    case model of
+        Playing submodel ->
+            Playing
+                { submodel
+                | style = Animation.update animation submodel.style
+                }
+
+        _ ->
+            model
 
 keyUp : Keyboard.KeyCode -> Model -> ( Model, Cmd Msg)
 keyUp keyCode model =
@@ -150,7 +173,20 @@ changeColor : Color -> Model -> Model
 changeColor color model =
     case model of
         Playing submodel ->
-            Playing { submodel | color = color }
+            Playing
+                { submodel
+                | color = color
+                , style =
+                    Animation.interrupt
+                        [ Animation.to
+                            [ Animation.opacity 0
+                            ]
+                        , Animation.to
+                            [ Animation.opacity 1
+                            ]
+                        ]
+                        submodel.style
+                }
 
         _ ->
             model
@@ -212,7 +248,7 @@ viewProgressScreen model =
     Html.div
         [ class "progress-screen" ]
         [ viewTime model.remaining
-        , viewColor model.color
+        , viewColor model.color model.style
         , viewScore model.score
         ]
 
@@ -239,14 +275,16 @@ minutesAndSeconds time =
             |> String.join ":"
 
 
-viewColor : Color -> Html msg
-viewColor color =
+viewColor : Color -> Animation.State -> Html msg
+viewColor color currentStyle =
     Html.div
-        [ class "current-color"
-        ,  style
-            [ ("background-color", cssColor color)
-            ]
-        ]
+        (Animation.render currentStyle
+            ++ [ class "current-color"
+               , style
+                    [ ("background-color", cssColor color)
+                    ]
+               ]
+        )
         []
 
 
@@ -293,5 +331,16 @@ subscriptions model =
         -- TODO: throttle ?
         [ Keyboard.ups KeyUp
         , Time.every timeInterval Tick
+        , animationSubscription model
         ]
+
+
+animationSubscription : Model -> Sub Msg
+animationSubscription model =
+    case model of
+        Playing submodel ->
+            Animation.subscription Animate [ submodel.style ]
+
+        _ ->
+            Sub.none
 
