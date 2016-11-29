@@ -1,6 +1,5 @@
 module Main exposing (main)
 
-
 import Html.App
 import Html exposing (Html)
 import Html.Attributes exposing (style, class)
@@ -29,13 +28,15 @@ main =
 
 -- MODEL
 
+
 type Model
     = Waiting
     | Playing PlayModel
     | Ended Score
 
 
-type alias Score = Int
+type alias Score =
+    Int
 
 
 type alias PlayModel =
@@ -44,7 +45,6 @@ type alias PlayModel =
     , score : Score
     , style : Animation.State
     }
-
 
 
 init : ( Model, Cmd Msg )
@@ -77,7 +77,9 @@ totalTime =
     3 * Time.minute
 
 
+
 -- UPDATE
+
 
 type Msg
     = Tick Time
@@ -102,20 +104,20 @@ update message model =
             ( updateAnimation animation model, Cmd.none )
 
 
-
 updateAnimation : Animation.Msg -> Model -> Model
 updateAnimation animation model =
     case model of
         Playing submodel ->
             Playing
                 { submodel
-                | style = Animation.update animation submodel.style
+                    | style = Animation.update animation submodel.style
                 }
 
         _ ->
             model
 
-keyUp : Keyboard.KeyCode -> Model -> ( Model, Cmd Msg)
+
+keyUp : Keyboard.KeyCode -> Model -> ( Model, Cmd Msg )
 keyUp keyCode model =
     case Key.fromCode keyCode of
         Key.Space ->
@@ -126,7 +128,7 @@ keyUp keyCode model =
                 Playing submodel ->
                     ( Playing
                         { submodel
-                        | score = submodel.score + 1
+                            | score = submodel.score + 1
                         }
                     , generateColor
                     )
@@ -143,24 +145,23 @@ generateColor =
     Random.generate NewColor BallColor.generator
 
 
-
 changeColor : Color -> Model -> ( Model, Cmd Msg )
 changeColor color model =
     case model of
         Playing submodel ->
             ( Playing
                 { submodel
-                | color = color
-                , style =
-                    Animation.interrupt
-                        [ Animation.to
-                            [ Animation.opacity 0
+                    | color = color
+                    , style =
+                        Animation.interrupt
+                            [ Animation.to
+                                [ Animation.opacity 0
+                                ]
+                            , Animation.to
+                                [ Animation.opacity 1
+                                ]
                             ]
-                        , Animation.to
-                            [ Animation.opacity 1
-                            ]
-                        ]
-                        submodel.style
+                            submodel.style
                 }
             , Audio.play (BallColor.name color)
             )
@@ -176,11 +177,10 @@ tick time model =
             if submodel.remaining > 0 then
                 ( Playing
                     { submodel
-                    | remaining = submodel.remaining - timeInterval
+                        | remaining = submodel.remaining - timeInterval
                     }
                 , Cmd.none
                 )
-
             else
                 ( Ended submodel.score, Audio.play "gameOver" )
 
@@ -245,9 +245,14 @@ viewTime time =
 minutesAndSeconds : Time -> String
 minutesAndSeconds time =
     let
-        raw = round (Time.inSeconds time)
-        minutes = raw // 60 |> toString
-        seconds = rem raw 60 |> toString
+        raw =
+            round (Time.inSeconds time)
+
+        minutes =
+            raw // 60 |> toString
+
+        seconds =
+            rem raw 60 |> toString
     in
         [ minutes, seconds ]
             |> List.map (String.padLeft 2 '0')
@@ -260,7 +265,7 @@ viewColor color currentStyle =
         (Animation.render currentStyle
             ++ [ class "current-color"
                , style
-                    [ ("background-color", BallColor.cssColor color)
+                    [ ( "background-color", BallColor.cssColor color )
                     ]
                ]
         )
@@ -312,4 +317,3 @@ animationSubscription model =
 
         _ ->
             Sub.none
-

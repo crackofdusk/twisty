@@ -9,8 +9,8 @@ type Key
 fromCode : Int -> Key
 fromCode keyCode =
     case keyCode of
-      32 ->
-          Space
+        32 ->
+            Space
 
-      _ ->
-          Unknown
+        _ ->
+            Unknown

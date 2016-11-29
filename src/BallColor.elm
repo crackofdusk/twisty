@@ -1,11 +1,11 @@
-module BallColor exposing
-    ( Color
-    , name
-    , cssColor
-    , default
-    , generator
-    )
-
+module BallColor
+    exposing
+        ( Color
+        , name
+        , cssColor
+        , default
+        , generator
+        )
 
 import Color
 import String
@@ -64,8 +64,11 @@ toElmColor color =
 cssColor : Color -> String
 cssColor color =
     let
-        rgb = Color.toRgb (toElmColor color)
-        components = [rgb.red, rgb.green, rgb.blue]
+        rgb =
+            Color.toRgb (toElmColor color)
+
+        components =
+            [ rgb.red, rgb.green, rgb.blue ]
     in
         "rgb(" ++ (String.join "," (List.map toString components)) ++ ")"
 
@@ -96,14 +99,37 @@ default =
     White
 
 
+
 -- constructors
 
-pink = Pink
-blue = Blue
-red = Red
-green = Green
-black = Black
-yellow = Yellow
-purple = Purple
-orange = Orange
 
+pink =
+    Pink
+
+
+blue =
+    Blue
+
+
+red =
+    Red
+
+
+green =
+    Green
+
+
+black =
+    Black
+
+
+yellow =
+    Yellow
+
+
+purple =
+    Purple
+
+
+orange =
+    Orange
