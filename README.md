@@ -4,9 +4,9 @@ This is the software part of a game made at [ZooMachines](http://zoomachines.com
 
 ## Development
 
-Install Elm 0.17.1:
+Install Elm 0.18:
 
-    npm install -g elm@0.17.1
+    npm install -g elm@0.18
 
 Compile the app:
 

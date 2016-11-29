@@ -1,6 +1,5 @@
 module Main exposing (main)
 
-import Html.App
 import Html exposing (Html)
 import Html.Attributes exposing (style, class)
 import BallColor exposing (Color)
@@ -15,9 +14,9 @@ import Audio
 import Dict exposing (Dict)
 
 
-main : Program Never
+main : Program Never Model Msg
 main =
-    Html.App.program
+    Html.program
         { init = init
         , update = update
         , view = view
